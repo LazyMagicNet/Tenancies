@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<!--
+  Tenant-level /explore/ root for the apex (lazymagicdev.click). The tenant owns
+  the root domain, so its /explore/ is the "Our Locations" directory listing the
+  subtenants. Subtenant hosts override /explore/ (level-2 cascade) with their own
+  branded landing. Redirects bare /explore/ → /explore/home/. The MagicPetsPlugin
+  generates subtenants.json into this folder; `lz deployassets` syncs it to
+  lzm-mp--webapp-explore-{ts}.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=home/" />
+    <title>MagicPets — Our Locations</title>
+</head>
+<body>
+    <p><a href="home/">Continue &rarr;</a></p>
+</body>
+</html>

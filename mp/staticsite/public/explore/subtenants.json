@@ -1,0 +1,23 @@
+{
+  "tenant": "mp",
+  "subtenants": [
+    {
+      "key": "uptown",
+      "host": "uptown.lazymagicdev.click",
+      "displayName": "Uptown",
+      "description": "Premium pets, grooming \u0026 supplies \u2014 uptown style.",
+      "logoUrl": null,
+      "linkMode": "both",
+      "requiresAuth": false
+    },
+    {
+      "key": "downtown",
+      "host": "downtown.lazymagicdev.click",
+      "displayName": "Downtown",
+      "description": "Your friendly neighborhood pet shop \u2014 right downtown.",
+      "logoUrl": null,
+      "linkMode": "both",
+      "requiresAuth": false
+    }
+  ]
+}

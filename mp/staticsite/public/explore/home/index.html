@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MagicPets — Our Locations</title>
+    <style>
+        :root { --accent:#0f766e; --accent-dark:#115e59; --ink:#1f2933; --ink-soft:#52606d;
+                --bg:#f6f8fb; --card:#ffffff; --border:rgba(15,23,42,.08); }
+        * { box-sizing:border-box; }
+        body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+               color:var(--ink); background:var(--bg); line-height:1.55; }
+        .hero { text-align:center; padding:4rem 1.5rem 3rem;
+                background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#fff; }
+        .hero .eyebrow { font-size:.85rem; letter-spacing:.22em; text-transform:uppercase; opacity:.9; margin:0 0 .5rem; }
+        .hero h1 { margin:0 0 .4rem; font-size:clamp(2rem,4.5vw,2.8rem); font-weight:600; }
+        .hero p { margin:0; opacity:.92; }
+        main { max-width:72rem; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(18rem,1fr)); gap:1.25rem; visibility:hidden; }
+        .grid.ready { visibility:visible; }
+        .card { display:flex; flex-direction:column; background:var(--card); border:1px solid var(--border);
+                border-radius:14px; overflow:hidden; transition:transform .15s,box-shadow .15s; }
+        .card:hover { transform:translateY(-2px); box-shadow:0 14px 32px rgba(15,23,42,.10); }
+        .logo { display:flex; align-items:center; justify-content:center; min-height:8rem; background:#eef2f7; padding:1.25rem; }
+        .logo img { max-width:100%; max-height:5.5rem; object-fit:contain; }
+        .logo.placeholder { font-size:1.4rem; font-weight:600; color:var(--accent); }
+        .body { padding:1.25rem 1.5rem 1.5rem; display:flex; flex-direction:column; gap:.4rem; flex:1 1 auto; }
+        .name { margin:0; font-size:1.2rem; }
+        .host { margin:0; font-size:.78rem; color:var(--ink-soft); letter-spacing:.03em; }
+        .desc { margin:.25rem 0 1rem; color:var(--ink-soft); flex:1 1 auto; }
+        .ctas { display:flex; flex-wrap:wrap; gap:.5rem; }
+        .cta { flex:1 1 auto; text-align:center; text-decoration:none; padding:.7rem 1rem; border-radius:8px;
+               font-size:.85rem; font-weight:600; background:var(--accent); color:#fff; border:2px solid var(--accent); transition:.15s; }
+        .cta:hover { background:var(--accent-dark); border-color:var(--accent-dark); }
+        .cta.secondary { background:transparent; color:var(--accent); }
+        .cta.secondary:hover { background:var(--accent); color:#fff; }
+        .empty { text-align:center; color:var(--ink-soft); padding:3rem 1rem; }
+        footer { text-align:center; padding:1.5rem; font-size:.8rem; color:var(--ink-soft); }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <p class="eyebrow">&#128062; MagicPets</p>
+        <h1>Our Locations</h1>
+        <p>Find your nearest MagicPets store.</p>
+    </div>
+    <main>
+        <section id="grid" class="grid" aria-label="MagicPets locations"></section>
+        <p id="empty" class="empty" hidden>No locations yet.</p>
+    </main>
+    <footer>MagicPets</footer>
+
+    <script>
+        // Tenant-level locations directory served at /explore/home/ on the apex
+        // (the tenant root). subtenants.json is generated at deploy time by
+        // MagicPetsPlugin (lz deploysubtenants) from the subtenant configs.
+        // Schema: { tenant, subtenants: [{ key, host, displayName, description,
+        //           logoUrl, linkMode, requiresAuth }] }
+        (function () {
+            const grid = document.getElementById('grid');
+            const empty = document.getElementById('empty');
+            const titleCase = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+            const authed = /(?:^|; )lz-auth=/.test(document.cookie);
+
+            function render(data) {
+                const subs = (data && data.subtenants) || [];
+                if (!subs.length) { empty.hidden = false; grid.classList.add('ready'); return; }
+                const frag = document.createDocumentFragment();
+                subs.forEach(s => {
+                    const name = s.displayName || titleCase(s.key);
+                    const base = s.host ? 'https://' + s.host : '#';
+                    const card = document.createElement('article');
+                    card.className = 'card';
+
+                    const logo = document.createElement('div');
+                    logo.className = 'logo';
+                    if (s.logoUrl) {
+                        const img = document.createElement('img');
+                        img.src = s.logoUrl; img.alt = name + ' logo';
+                        img.onerror = () => { logo.classList.add('placeholder'); logo.textContent = name; img.remove(); };
+                        logo.appendChild(img);
+                    } else { logo.classList.add('placeholder'); logo.textContent = name; }
+
+                    const body = document.createElement('div');
+                    body.className = 'body';
+                    body.innerHTML = '<h2 class="name"></h2><p class="host"></p><p class="desc"></p>';
+                    body.querySelector('.name').textContent = name;
+                    body.querySelector('.host').textContent = s.host || '';
+                    body.querySelector('.desc').textContent = s.description || '';
+
+                    const ctas = document.createElement('div');
+                    ctas.className = 'ctas';
+                    const mode = (s.linkMode || 'both').toLowerCase();
+                    const canUseApp = !s.requiresAuth || authed;
+                    const mk = (label, path, secondary) => {
+                        const a = document.createElement('a');
+                        a.className = 'cta' + (secondary ? ' secondary' : '');
+                        a.textContent = label; a.href = base + path; return a;
+                    };
+                    const visit = sec => mk('Visit', '/explore/home/', sec);
+                    const enter = sec => canUseApp ? mk('Enter store', '/', sec)
+                                                   : mk('Sign in', '/authentication/login?returnUrl=/', sec);
+                    if (mode === 'app') ctas.appendChild(enter(false));
+                    else if (mode === 'landing') ctas.appendChild(visit(false));
+                    else { ctas.appendChild(visit(false)); ctas.appendChild(enter(true)); }
+                    body.appendChild(ctas);
+
+                    card.appendChild(logo); card.appendChild(body); frag.appendChild(card);
+                });
+                grid.innerHTML = ''; grid.appendChild(frag); grid.classList.add('ready');
+            }
+
+            fetch('/explore/subtenants.json', { cache: 'no-store' })
+                .then(r => r.ok ? r.json() : Promise.reject(r.status))
+                .then(render)
+                .catch(() => {
+                    empty.textContent = 'Locations are currently unavailable.';
+                    empty.hidden = false; grid.classList.add('ready');
+                });
+        })();
+    </script>
+</body>
+</html>

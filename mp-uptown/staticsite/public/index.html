@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<!--
+  Static-site root for the Uptown subtenant. Synced to the subtenant's explore
+  bucket and served at /explore/. Redirects the bare /explore/ to /explore/home/
+  so it always lands on a page. Mirrors the BC layout (public/index.html +
+  public/home/index.html). Built output — `lz deploystaticsite` does NOT run a
+  generator; it syncs this folder as-is. Deploy from the Tenancies repo with:
+    lz deploystaticsite --subtenantkey uptown --webapp mp-uptown/staticsite/public
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=home/" />
+    <title>MagicPets — Uptown</title>
+</head>
+<body>
+    <p><a href="home/">Continue to Uptown &rarr;</a></p>
+</body>
+</html>
