@@ -60,7 +60,6 @@
             const grid = document.getElementById('grid');
             const empty = document.getElementById('empty');
             const titleCase = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-            const authed = /(?:^|; )lz-auth=/.test(document.cookie);
 
             function render(data) {
                 const subs = (data && data.subtenants) || [];
@@ -91,15 +90,16 @@
                     const ctas = document.createElement('div');
                     ctas.className = 'ctas';
                     const mode = (s.linkMode || 'both').toLowerCase();
-                    const canUseApp = !s.requiresAuth || authed;
                     const mk = (label, path, secondary) => {
                         const a = document.createElement('a');
                         a.className = 'cta' + (secondary ? ' secondary' : '');
                         a.textContent = label; a.href = base + path; return a;
                     };
                     const visit = sec => mk('Visit', '/explore/home/', sec);
-                    const enter = sec => canUseApp ? mk('Enter store', '/', sec)
-                                                   : mk('Sign in', '/authentication/login?returnUrl=/', sec);
+                    // These are CONSUMER-facing pages → "Enter store" opens the consumer app (/app/),
+                    // NOT the employee store app (/store/). /app/ is browse-friendly (no pre-auth), so
+                    // there is no "Sign in" gate here; the consumer signs in from within the app.
+                    const enter = sec => mk('Enter store', '/app/', sec);
                     if (mode === 'app') ctas.appendChild(enter(false));
                     else if (mode === 'landing') ctas.appendChild(visit(false));
                     else { ctas.appendChild(visit(false)); ctas.appendChild(enter(true)); }
